@@ -1,5 +1,3 @@
-use std::u32;
-
 advent_of_code::solution!(1);
 
 fn parse_input(input: &str) -> Option<Vec<(bool, i32)>> {
