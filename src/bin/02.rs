@@ -10,31 +10,26 @@ fn parse(input: &str) -> Vec<RangeInclusive<u64>> {
 }
 
 fn is_repeating_2(num: &u64) -> bool {
-    let s = num.to_string();
-    let len = s.len();
-    if len % 2 == 1 {
+    let digits = num.ilog10() + 1;
+    if !digits.is_multiple_of(2) {
         return false;
     }
-    let (left, right) = s.split_at(len / 2);
+    let left = num / 10u64.pow(digits / 2);
+    let right = num % 10u64.pow(digits / 2);
     left == right
 }
 
 fn is_repeating_n(num: &u64) -> bool {
-    let s = num.to_string();
-    let len = s.len();
-    'outer: for i in 1..=(len / 2) {
-        if !len.is_multiple_of(i) {
+    let digits = num.ilog10() + 1;
+    for i in 1..=(digits / 2) {
+        if !digits.is_multiple_of(i) {
             continue;
         }
-        let (pattern, mut rest) = s.split_at(i);
-        while !rest.is_empty() {
-            let (to_check, new_rest) = rest.split_at(i);
-            if to_check != pattern {
-                continue 'outer;
-            }
-            rest = new_rest;
+        let pattern = num % 10u64.pow(i);
+        let expected: u64 = (0..(digits / i)).map(|k| pattern * 10u64.pow(i * k)).sum();
+        if expected == *num {
+            return true;
         }
-        return true;
     }
     false
 }
