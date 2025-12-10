@@ -1,5 +1,6 @@
 use std::collections::VecDeque;
 
+use itertools::Itertools;
 use z3::{Optimize, SatResult, ast::Int};
 
 advent_of_code::solution!(10);
@@ -21,23 +22,11 @@ impl Machine {
     }
 
     fn fewest_presses(&self) -> u64 {
-        let mut queue = VecDeque::new();
-        queue.push_back((0, 0));
-        while let Some((depth, state)) = queue.pop_front() {
-            for &button in &self.buttons {
-                let new_state = state ^ button;
-                if new_state == self.target_state {
-                    return depth + 1;
-                }
-                queue.push_back((depth + 1, new_state));
-            }
-        }
-        unreachable!("");
+        self.buttons.iter().powerset().filter_map(|buttons| if buttons.iter().fold(0, |acc, n| acc ^ *n) == self.target_state {Some(buttons.len())} else {None}).min().unwrap() as u64
     }
 
+    // Heavily inspired by: https://www.reddit.com/r/adventofcode/comments/1pity70/comment/nta1om6/
     fn fewest_joltage_presses(&self) -> u64 {
-        // let buttons = self.buttons.iter().map(|button| (0..(usize::BITS as usize)).filter(|n| (n >> n) & 1 != 1).collect()).collect::<Vec<Vec<_>>>();
-
         let opt = Optimize::new();
         let total_presses = Int::fresh_const("total_presses");
 
